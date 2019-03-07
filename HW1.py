@@ -4,7 +4,6 @@ import numpy as np
 from scipy.spatial import KDTree
 from scipy.spatial import distance
 
-
 start = time.time()
 
 
@@ -75,6 +74,14 @@ def RN(df, df_drop, df_tree, var1, var2, R):
     return (det_class)
 
 
+def LOO_RN(df, df_drop, df_tree, var1, var2, R):
+    loo_array = []
+    for i in range(1, 30, 4):
+        res_class = RN(df, df_drop, df_tree, var1, var2, i)
+        loo_array.append(sum(abs(df['label'] - res_class)) / df.shape[0])
+        print('R=', i, '   LOO=', loo_array[i // 4])
+
+
 df = pd.read_csv("/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW1/spam.csv")
 # df = pd.read_csv("/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW1/cancer.csv")
 k = 11
@@ -100,18 +107,7 @@ print(' File: Spam')
 max_dist = df['distance'].max()
 print('Max distance = ', max_dist)
 # print('Max distance Spam', max_dist)
-
-
-
-
-def LOO_RN(df, df_drop, df_tree, var1, var2, R):
-    loo_array = []
-    for i in range(1, 30, 4):
-        res_class = RN(df, df_drop, df_tree, var1, var2, i)
-        loo_array.append(sum(abs(df['label'] - res_class)) / df.shape[0])
-        print('R=', i, '   LOO=', loo_array[i//4])
-
-
+rad_n = RN(df, df_drop, df_tree, 0, 1, 4)
 print(LOO_RN(df, df_drop, df_tree, 0, 1, 4))
 
 end = time.time()
