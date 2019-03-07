@@ -76,14 +76,22 @@ def RN(df, df_drop, df_tree, var1, var2, R):
 
 def LOO_RN(df, df_drop, df_tree, var1, var2, R):
     loo_array = []
-    for i in range(1, 30, 4):
+    for i in range(1, 30, R):
         res_class = RN(df, df_drop, df_tree, var1, var2, i)
         loo_array.append(sum(abs(df['label'] - res_class)) / df.shape[0])
         print('R=', i, '   LOO=', loo_array[i // 4])
 
 
-df = pd.read_csv("/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW1/spam.csv")
-# df = pd.read_csv("/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW1/cancer.csv")
+def LOO_RN_Cancer(df, df_drop, df_tree, var1, var2, R):
+    loo_array = []
+    for i in range(1, 100, R):
+        res_class = RN(df, df_drop, df_tree, var1, var2, i)
+        loo_array.append(1 - len(np.nonzero(np.array(df['label']) == np.array(res_class))[0]) / df.shape[0])
+        print('R=', i, '   LOO=', loo_array[i // 4])
+
+
+# df = pd.read_csv("/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW1/spam.csv")
+df = pd.read_csv("/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW1/cancer.csv")
 k = 11
 
 df_drop = df.drop(columns=['label'])
@@ -98,17 +106,17 @@ neighbors = closer_neighbors(df_tree, df_drop, k)
 # print(' File: Cancer - Closest 11 \n', df.iloc[neighbors[0]])
 # print(' File: Spam - Closest 11 \n', df.iloc[neighbors[0]])
 
-# print(' File: Cancer')
+print(' File: Cancer')
 # LOO_Cancer(df, neighbors, 'M', 'B', k)
-print(' File: Spam')
+# print(' File: Spam')
 # LOO_Spam(df, neighbors, 0, 1, k)
 
 # print(df)
 max_dist = df['distance'].max()
 print('Max distance = ', max_dist)
 # print('Max distance Spam', max_dist)
-rad_n = RN(df, df_drop, df_tree, 0, 1, 4)
-print(LOO_RN(df, df_drop, df_tree, 0, 1, 4))
-
+# rad_n = RN(df, df_drop, df_tree, 0, 1, 4)
+# print(LOO_RN(df, df_drop, df_tree, 0, 1, 4))
+print(LOO_RN_Cancer(df, df_drop, df_tree, 'M', 'B', 4))
 end = time.time()
 print('time =', round(end - start), 's\n')
