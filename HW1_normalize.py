@@ -5,6 +5,7 @@ from scipy.spatial import KDTree
 from scipy.spatial import distance
 from sklearn import preprocessing
 from sklearn.preprocessing import normalize
+from sklearn.preprocessing import MinMaxScaler
 import math
 
 start = time.time()
@@ -87,10 +88,10 @@ def LOO_RN(df, df_drop, df_tree, var1, var2, R):
 
 def LOO_RN_Cancer(df, df_drop, df_tree, var1, var2, R):
     loo_array = []
-    for i in np.arange(0, 0.1, R):
+    for i in np.arange(0, 1, R):
         res_class = RN(df, df_drop, df_tree, var1, var2, i)
         loo_array.append(1 - len(np.nonzero(np.array(df['label']) == np.array(res_class))[0]) / df.shape[0])
-        print('R=', i, '   LOO=', loo_array[math.floor(i // 0.02)])
+        print('R=', i, '   LOO=', loo_array[math.floor(i // 0.2)])
 
 
 
@@ -99,13 +100,13 @@ df = pd.read_csv("/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLea
 k = 11
 
 df_drop = df.drop(columns=['label'])
-df_drop=pd.DataFrame(preprocessing.normalize(df_drop))
+df_drop=pd.DataFrame(MinMaxScaler().fit_transform(df_drop))
 labels = df.label
 cell = df.iloc[0]
 df_tree = KDTree(df_drop)
 
 euc_distance = kNN(df, cell)
-df['distance'] = euc_distance
+# df['distance'] = euc_distance
 
 neighbors = closer_neighbors(df_tree, df_drop, k)
 # print(' File: Cancer - Closest 11 \n', df.iloc[neighbors[0]])
@@ -117,11 +118,12 @@ print(' File: Spam Normalized')
 # LOO_Spam(df, neighbors, 0, 1, k)
 
 # print(df)
-max_dist = df['distance'].max()
-print('Max distance = ', max_dist)
+# max_dist = df['distance'].max()
+# print('Max distance = ', max_dist)
 # print('Max distance Spam', max_dist)
 # rad_n = RN(df, df_drop, df_tree, 0, 1, 4)
+
+# print(LOO_RN_Cancer(df, df_drop, df_tree, 'M', 'B', 0.2))
 print(LOO_RN(df, df_drop, df_tree, 0, 1, 0.01))
-# print(LOO_RN_Cancer(df, df_drop, df_tree, 'M', 'B', 0.02))
 end = time.time()
 print('time =', round(end - start), 's\n')
