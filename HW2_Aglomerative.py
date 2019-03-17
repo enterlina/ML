@@ -74,7 +74,7 @@ dunn_ind = dunn_ind(df)
 # print(df)
 agglomerative_clustering(df, nearest_dist, nearest_ind, pairs, k)
 print(df)
-print('k =', k, 'Dunn_ind =', dunn_ind)
+print('k =', k, 'Dunn_index =', dunn_ind)
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
