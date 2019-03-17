@@ -40,9 +40,10 @@ def dunn_ind(df):
     return dunn_index
 
 
-def merge_cluster(df, cluster_1, cluster_2):
-    df.Cluster[df['Cluster'] == cluster_1] = max(cluster_1, cluster_2)
-    df.Cluster[df['Cluster'] == cluster_2] = max(cluster_1, cluster_2)
+def merge_cluster(df, cluster_1, cluster_2, pairs):
+    df['Cluster'][pairs[0]] == max(cluster_1, cluster_2)
+    df['Cluster'][pairs[1]] == max(cluster_1, cluster_2)
+
 
 k = 5
 df = pd.read_csv('/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW2/blobs2.csv')
@@ -57,6 +58,9 @@ nearest_dist = calculate_distance(df_original, df_tree)[0]
 nearest_ind = calculate_distance(df_original, df_tree)[1]
 pairs = find_min_pairs(nearest_dist, nearest_ind)
 
+print(pairs[0], pairs[1])
+print(df_tree)
+
 
 def agglomerative_clustering(df, nearest_dist, nearest_ind, pairs, k):
     distance_matrix = nearest_dist
@@ -64,19 +68,21 @@ def agglomerative_clustering(df, nearest_dist, nearest_ind, pairs, k):
 
     while len(df['Cluster'].unique()) > k:
         cluster_1, cluster_2 = pairs[0], pairs[1]
-        merge_cluster(df, cluster_1, cluster_2)
+        merge_cluster(df, cluster_1, cluster_2, pairs)
+
         if len(df['Cluster'].unique()) == k:
-            print(df)
+
             return df
 
 
 dunn_ind = dunn_ind(df)
 # print(df)
-agglomerative_clustering(df, nearest_dist, nearest_ind, pairs, k)
-print(df)
-print('k =', k, 'Dunn_index =', dunn_ind)
+df = agglomerative_clustering(df, nearest_dist, nearest_ind, pairs, k)
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
-scatter = ax.scatter(df[['X']], df[['Y']], c=np.array(df[['Cluster']]), cmap='jet')
-plt.show()
+print('k =', k, 'Dunn_index =', dunn_ind)
+print(df)
+
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# scatter = ax.scatter(df[['X']], df[['Y']], c=np.array(df[['Cluster']]), cmap='jet')
+# plt.show()
