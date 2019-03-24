@@ -7,6 +7,9 @@ import pandas as pd
 import numpy as np
 import numpy as np
 from sklearn.model_selection import train_test_split
+import math
+import statistics
+from statistics import mode
 
 
 class Tree_Node:
@@ -15,6 +18,7 @@ class Tree_Node:
         self.right = right
         self.feature = feature
         self.threshold = threshold
+
 
 def convert(df):
     df_1 = df.label
@@ -37,16 +41,23 @@ def split(df, df_label):
 
 def counter(label):
     counter = 0
-    for i in range(len(label)):
-        if label[i] == 1:
-            counter += 1
-    return counter / len(label)
+    # print(label)
+    if len(label) != 0:
+        for i in range(len(label)):
+            if label[i] == 1:
+                counter += 1
+        # print(len(label), counter / len(label))
+        return counter / len(label)
+    # else:
+    #     return 0
 
 
-def auc_classification(num, df, label):
-    return dict(
-        [(skmetrics.roc_auc_score(label, df[:, feature]), feature) for feature in range(0, num)]
-    )
+def auc_classification(df, label):
+    auc_dict = dict()
+    for i in range(1, df.shape[1]):
+        value = roc_auc_score(label, df[df.columns[i]])
+        auc_dict[value] = i
+    return auc_dict
 
 
 def find_max_ind(auc_ind):
@@ -55,7 +66,7 @@ def find_max_ind(auc_ind):
     return ind, auc_ind[ind]
 
 
-def calculate_accuracy(tree_cart, df_test, label_test):
+def calc_accuracy(tree_cart, df_test, label_test):
     for i in range(df_test.shape[0]):
         predicted_label = get_label_from_tree(tree_cart, df_test[i])
         expected_label = label_test[i]
@@ -80,8 +91,46 @@ def entropy(p):
     return - p * np.log2(p) - (1 - p) * np.log2((1 - p))
 
 
-def misclassification_error(p):
+def mis_error(p):
     return 1 - np.max([p, 1 - p])
+
+
+def get_ig(df, df_label, total, criteria):
+    len1 = len(df)
+    p = counter(df_label)
+    print('len', len1, 'total', total)
+    if criteria == 'mis_error':
+        return mis_error(p) * len1 / total
+    elif criteria == 'entropy':
+        return entropy(p) * len1 / total
+    elif criteria == 'gini':
+        return gini(p) * len1 / total
+
+
+def get_classific(df, df_label):
+    num_of_features = df.shape[1]
+    features_auc = auc_classification(df, df_label)
+    classific = []
+    for auc, feature in features_auc.items():
+        fpr, tpr, thresholds = metrics.roc_curve(df_label, df[df.columns[feature]])
+        optimal = np.argmax(tpr - fpr)
+        optimal_threshold = thresholds[optimal]
+        classific.append((feature, optimal_threshold))
+    return classific
+
+
+def split_classific(df, df_label, feature, threshold):
+    df_left, label_left, df_right, label_right = [], [], [], []
+    for i in range(0, df.shape[0]):
+        feature_value = df[df.columns[feature]]
+
+        if feature_value[i] >= threshold:
+            df_right.append(feature_value[i])
+            label_right.append(df_label[i])
+        else:
+            df_left.append(feature_value[i])
+            label_left.append(df_label[i])
+    return df_left, label_left, df_right, label_right
 
 
 def calc_p(column, label, criteria):
@@ -134,16 +183,6 @@ def class_percent(df_label):
     num2_per = num2 / len(df_label)
     return num1_per, num2_per
 
-def get_classific(df, label):
-    num_of_features = df.shape[1]
-    features_auc = auc_classification(num_of_features, df, label)
-    classific = []
-    for auc, feature in features_auc.items():
-        fpr, tpr, thresholds = skmetrics.roc_curve(label, df[:, feature])
-        optimal = np.argmax(tpr - fpr)
-        optimal_threshold = thresholds[optimal]
-        classific.append((feature, optimal_threshold))
-    return classific
 
 def calc_criteria(df_test):
     df_average = []
@@ -176,37 +215,66 @@ def prob_label(tree, sample):
         else:
             return prob_label(tree.left, sample)
 
+
 def cart(df, label, length, criteria, depth):
     rules = get_classific(df, label)
     print('rules', rules)
     depth_counter = 0
     if depth < max_depth:
         feature, threshold = get_best_rule(df, label, total, rules, criteria)
-        left_x, left_y, right_x, right_y = split_tree(df, label, feature_idx, threshold)
+        df_left, label_left, df_right, label_right = split_tree(df, label, feature_idx, threshold)
         depth_counter = depth + 1
-        left_node = cart(left_x, left_y, length, criteria, depth_counter, depth)
-        right_node = cart(right_x, right_y, length, criteria, new_depth, depth)
+        left_node = cart(df_left, label_left, length, criteria, depth_counter, depth)
+        right_node = cart(df_right, label_right, length, criteria, new_depth, depth)
         return Tree_Node(left_node, right_node, feature, threshold)
 
 
-def split_tree(df, label, feature, threshold):
-    df_left, label_left, df_right, label_right = [], [], [], []
-    for i, sample in enumerate(df):
-        feature_value = sample[feature]
-        label = label[i]
-        if feature_value >= threshold:
-            df_right.append(sample)
-            label_right.append(label)
-        else:
-            df_left.append(sample)
-            label_left.append(label)
-    return df_left, label_left, df_right, label_right
+def get_best_classific(df, df_label, classific, criteria):
+    count = 0
+    max_ig = 0
+    total = df.shape[0]
+    best_rule = None
+    for feature, optimal_threshold in classific:
+        df_left, label_left, df_right, label_right = split_classific(df, df_label, feature, optimal_threshold)
+
+        if len(label_left) == 0 or len(label_right) == 0:
+            count += 1
+            continue
+        ig_node = get_ig(df, df_label, total, criteria)
+        ig_left = get_ig(df_left, label_left, total, criteria)
+        ig_right = get_ig(df_right, label_right, total, criteria)
+
+        ig = ig_node - ig_left - ig_right
+        if ig == max_ig:
+            count += 1
+        if ig > max_ig:
+            max_ig = ig
+            best_rule = (feature, optimal_threshold)
+        print(best_rule)
+    return best_rule
 
 
 # df = pd.read_csv('/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW3/spam.csv')
-df = pd.read_csv('/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW3/cancer.csv')
+df = pd.read_csv('/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW3/cancer2.csv')
 df_label = convert(df)
 
+df['label'] = df_label
+
+df_original = df.drop(columns='label')
+
+df_train, df_test, label_train, label_test = split(df, df_label)
+
+# df_train = pd.DataFrame(df_train)
+# df_test = pd.DataFrame(df_test)
+# print(df_test)
+# p_1 = counter(label_train)
+# p_2 = counter(label_test)
+
+# criteria = ['gini', 'mis_error', 'entropy']
+
+classific = get_classific(df, df_label)
+
+total = df_train.shape[0]
 df['label'] = df_label
 
 df_original = df.drop(columns='label')
@@ -291,4 +359,3 @@ pyplot.ylim(0, 1)
 pyplot.plot([0, 1], [0, 1], linestyle='--')
 pyplot.plot(fpr, tpr, marker='.')
 pyplot.show()
-
