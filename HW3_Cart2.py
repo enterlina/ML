@@ -220,7 +220,7 @@ for i in range(1, 11):
     tree_cart = cart(df_train, label_train, df_train.shape[0], criteria, i)
     accuracy = calc_accuracy(tree_cart, df_test, label_test)
     accuracy_list.append(accuracy)
-    print('k = ', i, 'accuracy: ', accuracy)
+    print('k = ', i, 'accuracy = ', accuracy)
 
 criteria = 'entropy'
 accuracy_list = []
@@ -229,7 +229,7 @@ for i in range(1, 11):
     tree_cart = cart(df_train, label_train, df_train.shape[0], criteria, i)
     accuracy = calc_accuracy(tree_cart, df_test, label_test)
     accuracy_list.append(accuracy)
-    print('k = ', i, 'accuracy: ', accuracy)
+    print('k = ', i, 'accuracy = ', accuracy)
 
 criteria = 'misclassification_error'
 accuracy_list = []
@@ -238,7 +238,7 @@ for i in range(1, 11):
     tree_cart = cart(df_train, label_train, df_train.shape[0], criteria, i)
     accuracy = calc_accuracy(tree_cart, df_test, label_test)
     accuracy_list.append(accuracy)
-    print('k = ', i, 'accuracy: ', accuracy)
+    print('k = ', i, 'accuracy = ', accuracy)
 
 
 
@@ -258,10 +258,6 @@ pyplot.ylim(0, 1)
 pyplot.plot([0, 1], [0, 1], linestyle='--')
 pyplot.plot(fpr, tpr, marker='.')
 pyplot.show()
-
-
-
-
 
 
 criteria = 'entropy'
