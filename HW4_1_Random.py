@@ -12,9 +12,6 @@ import statistics
 from statistics import mode
 
 
-# import warnings
-# warnings.filterwarnings('ignore')
-
 class Tree_Node:
     def __init__(self, left, right, feature, threshold, probability):
         self.left = left
@@ -254,7 +251,7 @@ def print_auc(auc_value):
 
 
 # df = pd.read_csv('/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW3/spam.csv')
-df = pd.read_csv('/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW3/cancer2.csv')
+df = pd.read_csv('/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW3/cancer.csv')
 df_label = convert(df)
 df['label'] = df_label
 
