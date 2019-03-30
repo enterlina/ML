@@ -207,12 +207,12 @@ def tree_bootstrap(df, label):
     return df[index], label[index]
 
 
-def random_forest(df, label,impurity='gini'):
+def random_forest(df, label, criteria='gini'):
     total = df.shape[0]
     tree_array = []
     for i in range(20):
-        df, label = bootstrap(df, label)
-        tree_cart = cart(df, label, total, 0, impurity='gini')
+        df, label = tree_bootstrap(df, label)
+        tree_cart = cart(df, label, total, 'gini', 0)
         tree_array.append(tree_cart)
     return tree_array
 
@@ -237,19 +237,21 @@ def roc_curve(df, label, tree_array):
     auc_value = roc_auc_score(label, np.array(sum_of_probabilities))
     return fpr, tpr, auc_value
 
+
 def plot_roc_curve(fpr, tpr):
     pyplot.xlim(0, 1)
     pyplot.ylim(0, 1)
-#     pyplot.plot([0, 1], [0, 1], 'k--')
-    pyplot.plot(fpr, tpr,  marker='.',c='tab:orange')
+    pyplot.plot(fpr, tpr, marker='.', c='tab:orange')
 
     pyplot.show()
 
+
 def print_auc(auc_value):
     print('Gini ')
-    print('K: ',3)
-    print('N: ',20)
+    print('K: ', 3)
+    print('N: ', 20)
     print('ROC-AUC: ', auc_value)
+
 
 # df = pd.read_csv('/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW3/spam.csv')
 df = pd.read_csv('/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW3/cancer2.csv')
@@ -260,49 +262,13 @@ df_original = df.drop(columns='label')
 
 df_train, df_test, label_train, label_test = split(df, df_label)
 
-# df_train = pd.DataFrame(df_train)
-# df_test = pd.DataFrame(df_test)
+df_train, df_test, label_train, label_test = split(df, df_label)
 
-p_1 = counter(label_train)
-p_2 = counter(label_test)
+df_train, label_train = np.array(df_train.drop(columns='label')), np.array(df_train.label)
+tree_array = random_forest(df_train, label_train, criteria='gini')
 
-print(p_1, p_2)
-
-criteria = ['gini']
-
-auc = auc_classification(df_train, label_train)
-print(auc)
-total = df_train.shape[0]
-# print(total)
-ig = get_ig(df_train, label_train, total, 'gini')
-print('ig', ig)
-
-print(get_classific(df_train, label_train))
-
-# classific = get_classific(df, df_label)
-
-# total = df_train.shape[0]
-# df['label'] = df_label
-
-# df_original = df.drop(columns='label')
-
-
-# criteria = 'gini'
-# accuracy_list = []
-# print('Gini impurity\n')
-# for i in range(1, 11):
-#     # tree_cart = cart(df_train, label_train, df_train.shape[0], criteria, i)
-#     accuracy = calc_accuracy(tree_cart, df_test, label_test)
-#     accuracy_list.append(accuracy)
-#     print('k = ', i, 'accuracy = ', accuracy)
-
-
-df = read_file('/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW4/spam.csv')
-train, validate = train_test_split(df, stratify = df.label, test_size = 0.2)
-x, y = np.array(train.drop(columns = 'label')), np.array(train.label)
-ensemble = random_forest(x, y, impurity='gini')
-x_, y_ = np.array(validate.drop(columns = 'label')), np.array(list(validate.label))
-fpr, tpr, auc_value = get_roc_curve(x_, y_, ensemble)
+df_test, label_test = np.array(df_test.drop(columns='label')), np.array(list(label_test.label))
+fpr, tpr, auc_value = roc_curve(df_test, label_test, tree_array)
 
 print_auc(auc_value)
 plot_roc_curve(fpr, tpr)
