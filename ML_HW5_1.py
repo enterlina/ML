@@ -43,7 +43,7 @@ def perceptron(df, df_label, rate, epoch):
     return auc_dict, weights
 
 
-def visualize(X, y, n, weight_best):
+def graph(X, y, n, weight_best):
     h = 0.04
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
@@ -85,4 +85,4 @@ print('acc=', auc_dict[idx])
 print('weights=', weights[idx])
 
 
-visualize(df, df_label, n, weight_best)
+graph(df, df_label, n, weight_best)
