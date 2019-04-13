@@ -43,7 +43,7 @@ def perceptron(df, df_label, rate, epoch):
     return auc_dict, weights
 
 
-def graph(X, y, n, weight_best):
+def graph(X, y,n, weight_best):
     h = 0.04
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
@@ -51,8 +51,7 @@ def graph(X, y, n, weight_best):
                          np.arange(y_min, y_max, h))
     Z = predict_column(PolynomialFeatures(degree=n).fit_transform(np.c_[xx.ravel(), yy.ravel()]), weight_best)
     Z = Z.reshape(xx.shape)
-    df_pred = predict_column(X, weight_best)
-    X = np.delete(X, 0, 1)
+
     plt.scatter(X[:, 0], X[:, 1], c=y)
     plt.contour(xx, yy, Z, colors=['b', 'b'])
 
@@ -70,16 +69,15 @@ df_label = np.array(df_label)
 df = np.delete(df_origin, 2, 1)
 df = np.array(df)
 n = 4
-df = PolynomialFeatures(degree=n).fit_transform(df)
+df_poly = PolynomialFeatures(degree=n).fit_transform(df)
 
-auc_dict = []
-weights = []
-
-auc_dict, weights = perceptron(df, df_label, rate, epoch)
+auc_dict, weights = perceptron(df_poly, df_label, rate, epoch)
 auc_dict = np.array(auc_dict)
 idx = auc_dict.argmax()
 weight_best = weights[idx]
-df_pred = predict_column(df, weight_best)
+
+# df_pred = predict_column(df_poly, weight_best)
+
 print('n=', n)
 print('acc=', auc_dict[idx])
 print('weights=', weights[idx])
