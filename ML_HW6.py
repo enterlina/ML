@@ -1,27 +1,15 @@
 
-# coding: utf-8
-
-# In[23]:
-
-
-# import sklearn.metrics as skmetrics
 from matplotlib import pyplot
-import matplotlib.pyplot as plt
-from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 import pandas as pd
-import sklearn.model_selection as skms
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 
 
 def intialize(df):
-    weight = 0.01*np.random.sample(len(df[1, :]))
+    weight = 0.01 * np.random.sample(len(df[1, :]))
     return weight
 
 
@@ -38,7 +26,8 @@ def convert(df):
         elif df[i][0] == 0:
             df_label.append(0)
 
-    return df_label
+return df_label
+
 
 def loss(df, label, weight):
     return np.mean(np.log(1 + np.exp(np.multiply(-label, (df @ weight)))))
@@ -46,7 +35,7 @@ def loss(df, label, weight):
 
 def forward(row, weight):
     logits = row @ weight
-
+    
     return 1 / (1 + np.exp(-logits))
 
 
@@ -93,8 +82,6 @@ def scale_df(df):
     return df
 
 
-
-
 batches = 3
 epoch = 1000
 learning_rate = 0.5
@@ -102,11 +89,9 @@ learning_rate = 0.5
 # df_origin = pd.read_csv('/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW6/spam.csv')
 df_origin = pd.read_csv('/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW6/cancer.csv')
 
-
 df_origin = df_origin.values
 df_label = convert(df_origin)
 df_label = np.array(df_label)
-
 
 df_origin = np.array(df_origin)
 
@@ -115,9 +100,8 @@ df_label = np.array(df_label)
 df = np.delete(df_origin, 0, 1)
 df = np.array(df)
 
-
-column_one = np.ones((len(df),1))
-df=np.append(df,column_one,axis=1)
+column_one = np.ones((len(df), 1))
+df = np.append(df, column_one, axis=1)
 train_iterations = []
 train_accuracy = []
 train_loss = []
@@ -135,25 +119,20 @@ for i in range(epoch):
     for k in range(batches):
         df_iter, label_iter = split_iter(df_train, label_train, batches, k)
         weight = gradient(df_iter, label_iter, weight, learning_rate)
-        
-    weight_new=weight
-    
-    train_loss.append(loss(df_train, label_train, weight_new))
-    test_loss.append(loss(df_test, label_test, weight_new))
-    
-    df_pred_train = predict_column(df_train, weight_new)
-    df_pred_test = predict_column(df_test, weight_new)
-    
-    train_accuracy.append(accuracy(label_train, df_pred_train))
-    test_accuracy.append(accuracy(label_test, df_pred_test))
-    
-    train_iterations.append(i)
-    test_iterations.append(i)
 
+    weight_new = weight
 
+train_loss.append(loss(df_train, label_train, weight_new))
+test_loss.append(loss(df_test, label_test, weight_new))
 
+df_pred_train = predict_column(df_train, weight_new)
+df_pred_test = predict_column(df_test, weight_new)
 
-# In[22]:
+train_accuracy.append(accuracy(label_train, df_pred_train))
+test_accuracy.append(accuracy(label_test, df_pred_test))
+
+train_iterations.append(i)
+test_iterations.append(i)
 
 
 plt.plot(train_iterations, train_loss)
