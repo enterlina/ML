@@ -1,8 +1,4 @@
 
-# coding: utf-8
-
-# In[58]:
-
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -60,7 +56,6 @@ df_test = df_test.reshape(df_test.shape[0], 28, 28, 1)
 label_test = tf.keras.utils.to_categorical(label_test)
 
 
-# In[62]:
 
 
 model = cnn_model('sigmoid')
@@ -71,7 +66,6 @@ print('Loss:', score[0])
 print('Accuracy:', score[1])
 
 
-# In[63]:
 
 
 model = cnn_model('tanh')
@@ -82,7 +76,6 @@ print('Loss:', score[0])
 print('Accuracy:', score[1])
 
 
-# In[64]:
 
 
 model = cnn_model('relu')
