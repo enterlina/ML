@@ -9,7 +9,8 @@ from sklearn.preprocessing import StandardScaler
 
 
 def scale_df(df):
-    scaler = MinMaxScaler()
+    # scaler = MinMaxScaler()
+    scaler = StandardScaler()
     scaler.fit(df)
     df = scaler.transform(df)
     return df
@@ -32,17 +33,17 @@ def convert(df):
 
 
 def split(df, df_label):
-    df_train, df_test, label_train, label_test = train_test_split(df, df_label, test_size=0.4, shuffle=True)
+    df_train, df_test, label_train, label_test = train_test_split(df, df_label, test_size=0.6, shuffle=True)
     return df_train, df_test, label_train, label_test
 
 
 class LogRegression():
     def __init__(self):
-        self.weight = 0
+        self.weight = None
 
     def intialize(self, df):
-        self.weight = 0.001 * np.random.sample(df.shape[1])
-        return self.weight
+        self.weight =0.001*np.random.rand(df.shape[1])
+        # return self.weight
 
     def loss(self, df, label):
         return np.mean(np.log(1 + np.exp(np.multiply(-label, np.matmul(df, self.weight)))))
@@ -50,11 +51,12 @@ class LogRegression():
     def forward(self, df):
         return (1 / (1 + np.exp(np.matmul(-df, self.weight))))
 
-    def gradient(self, df, label, learning_rate):
+    def gradient(self, df, label):
         gradient_func = np.divide(label, (1 + np.exp(np.multiply(label, np.matmul(df, self.weight)))))
         gradient_vector = -(np.matmul(df.T, gradient_func)) / df.shape[0]
-        self.weight -= learning_rate * (gradient_vector)
-        return self.weight
+        self.weight = self.weight - self.learning_rate * gradient_vector
+        print('weight', self.weight)
+        # return self.weight
 
     def accuracy(self, df_label, df_pred):
         return accuracy_score(df_label, df_pred)
@@ -79,8 +81,8 @@ class LogRegression():
         df_train = self.add_column(df_train)
 
         df_test = self.add_column(df_test)
-
-        self.weight = self.intialize(df_train)
+        self.learning_rate = learning_rate
+        self.intialize(df_train)
         self.train_iterations = []
         self.train_accuracy = []
         self.train_loss = []
@@ -92,9 +94,9 @@ class LogRegression():
         for i in range(epoch):
             for k in range(batches):
                 self.df_iter, self.label_iter = self.split_iter(df_train, label_train, batches, k)
-                self.df_iter = self.df_iter.astype(float)
-                self.label_iter = self.label_iter.astype(float)
-                self.gradient(self.df_iter, self.label_iter, learning_rate)
+                # self.df_iter = self.df_iter.astype(float)
+                # self.label_iter = self.label_iter.astype(float)
+                self.gradient(self.df_iter, self.label_iter)
 
             self.train_loss.append(self.loss(df_train, label_train))
             self.test_loss.append(self.loss(df_test, label_test))
@@ -111,7 +113,14 @@ class LogRegression():
         plt.plot(self.train_iterations, self.test_accuracy)
         plt.ylabel('Error')
         plt.xlabel('Iterations')
+        plt.title('Accuracy')
         pyplot.show()
+
+        # plt.plot(self.train_iterations, self.test_loss)
+        # plt.ylabel('Error')
+        # plt.xlabel('Iterations')
+        # plt.title('Loss')
+        # pyplot.show()
 
 
 df_origin = pd.read_csv('/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW6/spam.csv')
@@ -127,10 +136,10 @@ df_label = np.array(df_label)
 
 df = np.delete(df_origin, 0, 1)
 df = np.array(df)
-df = scale_df(df)
-batches = 3
-epoch = 1000
-learning_rate = 0.5
+# df = scale_df(df)
+batches = 16
+epoch = 10000
+learning_rate = 1
 
 df_train, df_test, label_train, label_test = split(df, df_label)
 
