@@ -100,13 +100,9 @@ def get_feature_probability(X, y, word_probability):
             for word in word_probability:
                 if item == word:
                     for j in range(0, 2):
-                        print('pcfjbefore', pcf[j], 'i', j)
                         pcf[j] = float(pcf[j] * word_probability[word][j])
-                        print('pcfjafter', pcf[j], 'i', j)
-                        print('word_probability', word_probability[word][j])
 
         prediction = int(pcf.argmax())
-        print('prediction', prediction)
         predict_list.append(prediction)
         pcf_list.append(pcf[1])
     return predict_list, pcf_list
