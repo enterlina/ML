@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[9]:
+# In[18]:
+
 
 
 import random, numpy, math, copy, matplotlib.pyplot as plt
@@ -54,9 +55,18 @@ path_idx = np.argmin(distance_list)
 min_path = distance_list[path_idx]
 min_path_combination = combination_list[path_idx]
 
+x_plot = []
+y_plot = []
+for i in range(1,len(min_path_combination)):
+    x_cur = X[min_path_combination[i-1]-1]
+    x_next = X[min_path_combination[i]-1]
+    x_plot += [x_cur[0], x_next[0]]
+    y_plot += [x_cur[1], x_cur[1]]
+x_plot += [x_next[0]]
+y_plot += [x_next[1]]
 print('Min path=', min_path)
-print('Min path combination',min_path_combination)
-plt.plot(X, min_path_combination, 'xb-')
+# print('Min path combination',min_path_combination)
+plt.plot(x_plot, y_plot, 'xb-')
 plt.title('Random Walk TSP')
 plt.show()
 
