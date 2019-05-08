@@ -118,12 +118,12 @@ df_label = convert(df)
 y = np.array(df_label)
 
 X = np.array(X)
-df_train, df_test, label_train, label_test = train_test_split(X, y, test_size=0.3, shuffle=True)
+df_train, df_test, label_train, label_test = train_test_split(X, y, test_size=0.2, shuffle=True)
 
 corpus_dict = get_dictionary(df_train)
 
 word_probability = get_word_probability(df_train, label_train, corpus_dict)
-print(word_probability)
+
 
 predict_list, pcf_list = get_feature_probability(df_test, label_test, word_probability)
 

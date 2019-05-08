@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[40]:
+# In[3]:
 
 
 import pandas as pd
@@ -72,7 +72,7 @@ for i in range(1, 6):
   
 
 
-# In[47]:
+# In[11]:
 
 
 df_origin = pd.read_csv('/Users/alena_paliakova/Google Drive/!Bioinf_drive/02_MachinLearn/HW8/hydrodynamics.csv')
@@ -112,7 +112,7 @@ for i in range(1, 6):
     
     y_poly_pred = model.predict(x_test_poly)
     r_score = r2_score(y_test, y_poly_pred)
-    print('R-score', r_score, 'Aplha=',alpha, 'Nfeatures=',np.count_nonzero(model.coef_))
+    print('R-score', r_score, 'Aplha=',alpha, 'Nfeatures=',np.count_nonzero(model.coef_), 'Ntotal=',len(x_test_poly[1,:]) )
     
 
 
