@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[9]:
+
+
 
 
 import random, numpy, math, copy, matplotlib.pyplot as plt
@@ -37,9 +39,9 @@ min_combination_list=[]
 for k in range(n ):
     combination = np.random.permutation(len(y))
     
-
+    current_dist=0
     for i in range(1, len(combination)):
-        current_dist += cityblock(X[combination[l - 1]], X[combination[l]])
+        current_dist += cityblock(X[combination[i - 1]], X[combination[i]])
 
     min_path = current_dist
     tag=1
@@ -56,6 +58,7 @@ for k in range(n ):
                 combination_list = []
                 distance_list = []
                 neighbor[i], neighbor[j] = neighbor[j], neighbor[i]
+                
                 for l in range(1, len(neighbor)):
                     distance_comb += cityblock(X[neighbor[l - 1]], X[neighbor[l]])
 
@@ -76,24 +79,24 @@ min_path=min_path_list[path_idx]
 min_path_combination = min_combination_list[path_idx]
 
 print('Min path=', min_path)
-x_plot = []
-y_plot = []
-for i in range(1, len(min_path_combination)):
-    x_cur = X[min_path_combination[i - 1] - 1]
-    x_next = X[min_path_combination[i] - 1]
-    x_plot += [x_cur[0], x_next[0]]
-    y_plot += [x_cur[1], x_cur[1]]
-x_plot += [x_next[0]]
-y_plot += [x_next[1]]
-plt.plot(x_plot, y_plot, 'xb-')
+# print('min_path_combination',min_path_combination)
+
+
+way = X[min_path_combination,:]
+x, y = [], []
+x.append(way[0, 0])
+y.append(way[0, 1])
+for i in range(1, way.shape[0]):
+    x.append(way[i - 1, 0])
+    y.append(way[i, 1])
+    x.append(way[i, 0])
+    y.append(way[i, 1])
+
+plt.plot(way[:, 0], way[:, 1], 'xb', x, y, 'b')
 plt.title('Hill Climb')
 plt.show()
-
-
-# In[ ]:
-
-
-
+    
+    
 
 
 # In[ ]:
